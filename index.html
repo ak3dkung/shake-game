@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Shake Game</title>
+
+        <!-- Bootstrap CSS -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link href="font.css" rel="stylesheet">
+        <link href="game.css" rel="stylesheet">
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.3/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+            <!-- <div class="forHidePage text-center" id="loader">
+                <img src="images/ajax-loader.svg" width="20%" style="margin-top:300px" alt="">
+            </div> -->
+        <div class="container">
+            <div class="row" style="margin-top:40px">
+                <div class="col-xs-10 col-xs-offset-1 text-center blueBG"><h1>LET's SHAKE</h1></div>
+            </div>
+            <div class="row" style="margin-top:20px">
+                <div class="col-xs-6 col-xs-offset-3" id="coinImg">
+                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 blueBG text-center" id="startGameDiv">
+                    <!-- <br><button class="btn btn-lg btn-default" onclick="gameStart();return false;">START GAME</button><br><br> -->
+                </div>
+            </div>
+        </div>
+        <!-- jQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <!-- Bootstrap JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://cdn.rawgit.com/alexgibson/shake.js/master/shake.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+        <script src="https://d.line-scdn.net/liff/1.0/sdk.js"></script>
+        <script>  
+        // Initialize Firebase
+        var config = {
+                apiKey: //ใส่ API KEY ตรงนี้,
+                authDomain: //ใส่ authDomain ตรงนี้,
+                databaseURL: //ใส่ Database URL ตรงนี้,
+                projectId: //ใส่ projectID ตรงนี้,
+            };
+        firebase.initializeApp(config);
+        startGame=0;
+        liff.init(
+            data => {
+                // Now you can call LIFF API
+                const userId = data.context.userId;
+                
+                //$("#userIdShow").html(userId);
+                $.post("get_team.php",{
+                    uid:userId
+                },function(result){
+                    var obj=JSON.parse(result);
+                    if(obj.code==200){
+                        localStorage.setItem('userId', userId);
+                        localStorage.setItem('team', obj.team);
+                        if(obj.team==1){
+                            $('body').css('background-image','url(images/bg_blue.jpg)');
+                            $("#coinImg").html('<img src="images/coin1.png" width="100%" alt="">');
+                        }
+                        if(obj.team==2){
+                            $('body').css('background-image','url(images/bg_green.jpg)');
+                            $("#coinImg").html('<img src="images/coin3.png" width="100%" alt="">');
+                        }
+                        if(obj.team==3){
+                            $('body').css('background-image','url(images/bg_red.jpg)');
+                            $("#coinImg").html('<img src="images/coin2.png" width="100%" alt="">');
+                        }                        
+                        if(obj.team==4){
+                            $('body').css('background-image','url(images/bg_yellow.jpg)');
+                            $("#coinImg").html('<img src="images/coin4.png" width="100%" alt="">');
+                        }
+                        
+                        // var ControlGame = firebase.database().ref('ControlGame/'+obj.team+'/reset');
+                        // ControlGame.on('value', function(snapshot) {
+                        //     startGame=0;
+                        //     scoreAdd=0;
+                        // });
+                        
+                        var ControlGame2 = firebase.database().ref('ControlGame/'+obj.team+'/startBtn');
+                        ControlGame2.on('value', function(snapshot) {
+                            if(snapshot.val()=="on"){
+                                $("#startGameDiv").html('<br><button class="btn btn-lg btn-default" onclick="gameStart();return false;">START GAME</button><br><br>');
+                            } else {
+                                $("#startGameDiv").html('<br><button class="btn btn-lg btn-default" disabled>START GAME</button><br><br>');
+                                startGame=0;
+                                scoreAdd=0;
+                            }
+                            
+                        });
+                        $("#loader").fadeOut(1000);
+                    }
+                    if(obj.code==404){
+                        window.location.replace("../onsite_register.php");
+                    }                    
+                })
+            },
+            err => {
+                // LIFF initialization failed
+            }
+        );
+            
+            
+            
+
+            //listen to shake event
+            scoreAdd=0;
+            var shakeEvent = new Shake({threshold: 15});
+            shakeEvent.start();
+            window.addEventListener('shake', function(){
+                if(startGame==1){
+                    scoreAdd=scoreAdd+Math.floor(Math.random() * 3) + 1;
+                    $("#scoreTxt").html("<h3>"+scoreAdd+"</h3>");
+                    writeUserData(localStorage.getItem('userId'),localStorage.getItem('team'),scoreAdd);
+                }
+            }, false);
+
+            //stop listening
+            function stopShake(){
+                shakeEvent.stop();
+            }
+
+            //check if shake is supported or not.
+            if(!("ondevicemotion" in window)){alert("Not Supported");}
+
+
+            function writeUserData(userId,team,scoreData) {
+                firebase.database().ref(team+'/'+ userId).set({
+                    score: scoreData
+                });
+            }
+            function gameStart(){
+                startGame=1;
+                $("#startGameDiv").html("<h4>Your Score</h4><div id='scoreTxt'><h3>Start SHAKE NOW!!!!</h3></div>");
+            }
+        </script>
+    </body>
+</html>
+

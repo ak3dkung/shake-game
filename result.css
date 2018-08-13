@@ -1,0 +1,26 @@
+body{
+    font-family: 'GothamBold';
+    background-color:#004b91;
+}
+
+.bg1{
+    background-image:url('../images/bg_blue.jpg');
+    background-size:cover;
+}
+.bg2{
+    background-image:url('../images/bg_green.jpg');
+    background-size:cover;
+}
+.bg3{
+    background-image:url('../images/bg_red.jpg');
+    background-size:cover;
+}
+.bg4{
+    background-image:url('../images/bg_yellow.jpg');
+    background-size:cover;
+}
+.scoreShow{
+    background-color: #0e4d94;
+    color:#fff;
+    padding:10px;
+}
