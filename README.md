@@ -4,4 +4,4 @@ How to use
 2. Config SQL in get_team.php (or use other method to get ajax Team of user)
 
 
-**remark index.html only run on LINE LIFF can't run on local
+**remark index.html only run on LINE LIFF, can't run on local
